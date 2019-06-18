@@ -47,6 +47,7 @@ public class LyjAutoConfigure implements InitializingBean
         this.ddlExecutor =new DdlExecutor(lJdbc);
     }
 
+
     @Override
     public void afterPropertiesSet()
     {
