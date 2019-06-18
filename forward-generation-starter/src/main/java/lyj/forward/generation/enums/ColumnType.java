@@ -1,0 +1,13 @@
+package lyj.forward.generation.enums;
+
+/**
+ * <br>
+ * Mysql数据库类型的字段类型枚举
+ * @author 永健
+ * @since 2019/5/7 14:41
+ */
+public enum ColumnType
+{
+    FIELDTYPE,VARCHAR,INT,TEXT,TINYINT,SMALLINT,MEDIUMINT,BIGINT,FLOAT,DOUBLE,DECIMAL,DATE,TIME,YEAR,DATETIME,TIMESTAMP,CHAR
+    ,TINYBLOB,TINYTEXT,BLOB,MEDIUMBLOB,MEDIUMTEXT,LONGBLOB,LONGTEXT,SHORT;
+}
