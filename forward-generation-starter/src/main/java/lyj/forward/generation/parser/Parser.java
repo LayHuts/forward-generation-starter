@@ -3,6 +3,7 @@ package lyj.forward.generation.parser;
 import lyj.forward.generation.enums.ColumnType;
 import org.springframework.beans.factory.InitializingBean;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -13,6 +14,6 @@ import java.util.List;
  */
 public abstract class Parser
 {
-    protected void parser(List<Class<?>> entityClass){};
-    protected void parser(){};
+    protected void parser(List<Class<?>> entityClass) throws Exception {};
+    protected void parser() throws Exception {};
 }

@@ -48,26 +48,34 @@ public class DataBaseServiceHandler extends DdlBaseService
         // 实体类
         Map<String, EntityMetaInfo> entityMetaInfoMap = configureEntityTable.getEntityMetaInfoMap();
 
-        try {
+        try
+        {
             // 判断类型
             LyjMySqlProperties properties = this.configureEntityTable.getProperties();
-            if (DdlType.CREATE.name().equals(properties.getDdlAuto().toUpperCase())) {
+            if (DdlType.CREATE.name().equals(properties.getDdlAuto().toUpperCase()))
+            {
                 dropTable(tableNames);
                 createTable(entityMetaInfoMap);
-            } else {
+            }
+            else
+            {
                 createTable(tableNames, configureEntityTable, entityMetaInfoMap);
             }
             excutor.commit();
-        } catch (SQLException e) {
-            try {
+            logger.info("更新完成.....");
+        }
+        catch (SQLException e)
+        {
+            try
+            {
                 excutor.rollback();
-            } catch (SQLException e1) {
+            }
+            catch (SQLException e1)
+            {
                 e1.printStackTrace();
             }
             e.printStackTrace();
-            logger.info("对不起，出现了错误");
+            logger.error("对不起，出现了错误");
         }
-
-        logger.info("更新完成.....");
     }
 }

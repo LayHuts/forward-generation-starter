@@ -51,16 +51,8 @@ public class StringUtil
 
     public static void main(String[] args)
     {
-        StringBuilder builder = new StringBuilder();
-        String str="aBcDeFasdaDhagIjaa";
-        for (int i = 0; i < str.length(); i++) {
-            if (Character.isUpperCase(str.charAt(i))) {
-                builder.append("_").append(str.substring(i,i+1).toLowerCase());
-            }else {
-                builder.append(str.charAt(i));
-            }
-        }
-        System.out.println(builder.toString());
+        System.out.println(uncapitalizeToUnderLine("loginName"));
+
     }
 
     /**

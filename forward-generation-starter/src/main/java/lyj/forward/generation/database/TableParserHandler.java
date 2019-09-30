@@ -41,7 +41,7 @@ public class TableParserHandler extends Parser
     }
 
     @Override
-    public void parser()
+    public void parser() throws Exception
     {
 
         logger.info("获取数据库中原有的表数据......");
@@ -58,91 +58,89 @@ public class TableParserHandler extends Parser
      * <br>
      * 读取数据库中的所有表
      */
-    private void setTableName()
+    private void setTableName() throws Exception
     {
         List<String> tableNames = new ArrayList<>();
         ResultSet tables = null;
         List<TableMetaInfo> dataBaseTables = new ArrayList<>();
-        try {
-            tables = ddlExecutor.connection().getMetaData().getTables(getDataBaseName(), null, null, new String[]{"TABLE", "VIEW"});
-            while (tables.next()) {
-                tableNames.add(tables.getString(Constanst.TABLE_NAME));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        tables = ddlExecutor.connection().getMetaData().getTables(getDataBaseName(), null, null, new String[]{"TABLE", "VIEW"});
+        while (tables.next())
+        {
+            tableNames.add(tables.getString(Constanst.TABLE_NAME));
         }
         this.configureEntityTable.setTableNames(tableNames);
     }
 
 
-    private void handlerTableCoumn()
+    private void handlerTableCoumn() throws SQLException
     {
-        try {
-            List<String> tableNames = this.configureEntityTable.getTableNames();
-            Map<String, TableMetaInfo> metaInfoHashMap = new HashMap<>();
+        List<String> tableNames = this.configureEntityTable.getTableNames();
+        Map<String, TableMetaInfo> metaInfoHashMap = new HashMap<>();
 
-            for (String tableName : tableNames) {
+        for (String tableName : tableNames)
+        {
 
-                // 一张表对应列的集合
-                List<String> columuNames = new ArrayList<>();
+            // 一张表对应列的集合
+            List<String> columuNames = new ArrayList<>();
 
-                ResultSet resultSet = this.ddlExecutor.preparedStatementquery(DdlSql.SHOW_COLUM, tableName).executeQuery();
+            ResultSet resultSet = this.ddlExecutor.preparedStatementquery(DdlSql.SHOW_COLUM, tableName).executeQuery();
 
-                List<TableFieldMetaInfo> metaInfos = new ArrayList<>();
+            List<TableFieldMetaInfo> metaInfos = new ArrayList<>();
 
-                // 数据库中的字段类型 取出来与实体类比较是否需要更改或者添加
-                while (resultSet.next()) {
-                    TableFieldMetaInfo baseColum = new TableFieldMetaInfo();
+            // 数据库中的字段类型 取出来与实体类比较是否需要更改或者添加
+            while (resultSet.next())
+            {
+                TableFieldMetaInfo baseColum = new TableFieldMetaInfo();
 
-                    // 列名
-                    String colunmName = resultSet.getString(Constanst.FIELD);
-                    baseColum.setName(colunmName);
+                // 列名
+                String colunmName = resultSet.getString(Constanst.FIELD);
+                baseColum.setName(colunmName);
 
-                    // 类型 int(11)
-                    String type = resultSet.getString(Constanst.COLUMN_TYPE);
-                    String width = "";
-                    for (int i = 0; i < type.length(); i++) {
-                        if (type.charAt(i) >= 48 && type.charAt(i) <= 57) {
-                            width += type.charAt(i);
-                        }
+                // 类型 int(11)
+                String type = resultSet.getString(Constanst.COLUMN_TYPE);
+                String width = "";
+                for (int i = 0; i < type.length(); i++)
+                {
+                    if (type.charAt(i) >= 48 && type.charAt(i) <= 57)
+                    {
+                        width += type.charAt(i);
                     }
-                    type = type.substring(0, type.indexOf("(") == -1 ? type.length() : type.indexOf("("));
-
-
-                    // 列长度
-                    baseColum.setWidth(width.equals("") ? 0 : Integer.parseInt(width));
-
-                    // 列类型
-                    baseColum.setType(getCoumType(type));
-
-                    // 是否为空
-                    baseColum.setNull("YES".equals(resultSet.getString(Constanst.NULLABLE)) ? true : false);
-
-                    // 默认值
-                    baseColum.setDefaultValue(resultSet.getString(Constanst.COLUMN_DEF));
-
-                    // 是否是主键
-
-                    if ("PRI".equals(resultSet.getString(Constanst.COLUMN_PK))) {
-                        baseColum.setPrimaryKey(true);
-                    }
-
-                    // 是否自增
-                    baseColum.setAuto(resultSet.getString(Constanst.IS_AUTOINCREMENT).equals("auto_increment") ? true : false);
-
-                    // 列注释
-                    baseColum.setRemark(resultSet.getString(Constanst.COMMENT));
-
-                    columuNames.add(colunmName);
-                    metaInfos.add(baseColum);
                 }
-                TableMetaInfo dataBaseTable = new TableMetaInfo(tableName, columuNames, metaInfos);
-                metaInfoHashMap.put(tableName, dataBaseTable);
+                type = type.substring(0, type.indexOf("(") == -1 ? type.length() : type.indexOf("("));
+
+
+                // 列长度
+                baseColum.setWidth(width.equals("") ? 0 : Integer.parseInt(width));
+
+                // 列类型
+                baseColum.setType(getCoumType(type));
+
+                // 是否为空
+                baseColum.setNull("YES".equals(resultSet.getString(Constanst.NULLABLE)) ? true : false);
+
+                // 默认值
+                baseColum.setDefaultValue(resultSet.getString(Constanst.COLUMN_DEF));
+
+                // 是否是主键
+
+                if ("PRI".equals(resultSet.getString(Constanst.COLUMN_PK)))
+                {
+                    baseColum.setPrimaryKey(true);
+                }
+
+                // 是否自增
+                baseColum.setAuto(resultSet.getString(Constanst.IS_AUTOINCREMENT).equals("auto_increment") ? true : false);
+
+                // 列注释
+                baseColum.setRemark(resultSet.getString(Constanst.COMMENT));
+
+                columuNames.add(colunmName);
+                metaInfos.add(baseColum);
             }
-            this.configureEntityTable.setTableMetaInfoMap(metaInfoHashMap);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            TableMetaInfo dataBaseTable = new TableMetaInfo(tableName, columuNames, metaInfos);
+            metaInfoHashMap.put(tableName, dataBaseTable);
         }
+        this.configureEntityTable.setTableMetaInfoMap(metaInfoHashMap);
 
     }
 
@@ -150,7 +148,8 @@ public class TableParserHandler extends Parser
     private ColumnType getCoumType(String typeName)
     {
         typeName = typeName.toUpperCase();
-        switch (typeName) {
+        switch (typeName)
+        {
             case "VARCHAR":
                 return ColumnType.VARCHAR;
             case "INT":
@@ -224,14 +223,17 @@ public class TableParserHandler extends Parser
     }
 
 
-    private String getDataBaseName()
+    private String getDataBaseName() throws Exception
     {
         Connection connection = ddlExecutor.connection();
-        try {
+        try
+        {
             return connection.getCatalog();
-        } catch (SQLException e) {
+        }
+        catch (SQLException e)
+        {
             e.printStackTrace();
-            throw new MyException("找不到数据库");
+            throw new Exception("找不到数据库" + connection.getCatalog());
         }
     }
 

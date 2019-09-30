@@ -1,6 +1,8 @@
 package lyj.forward.generation.scanner;
 
 import lyj.forward.generation.annotation.LTable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -14,8 +16,10 @@ import java.util.Set;
  * @author 永健
  * @since 2019/5/7 15:27
  */
+
 public class EntityClassPathScanner extends ClassPathBeanDefinitionScanner
 {
+    private static Logger logger =LoggerFactory.getLogger(EntityClassPathScanner.class);
     /**
      * @param registry = false 不使用默认的扫描过滤器
      */

@@ -7,5 +7,7 @@ spring:
     url: jdbc:mysql://127.0.0.1:3307/test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
     username: root
     password: tiger
-    ddl-auto: create #update,create
+
+    #update 在原有的基础上更新,create：删除原来的表 根据实体信息重新建
+    ddl-auto: create
 

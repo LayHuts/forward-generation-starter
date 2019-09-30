@@ -45,4 +45,11 @@ public @interface LColumn
      */
     String comment() default "";
 
+    /**
+     * 映射到数据库的字段类型
+     * 例如：String->longtext
+     * @return
+     */
+    ColumnType mapping() default ColumnType.NULL;
+
 }

@@ -1,6 +1,5 @@
 package lyj.forward.generation.entity;
 
-import lyj.forward.generation.LyjAutoConfigure;
 import lyj.forward.generation.annotation.LColumn;
 import lyj.forward.generation.annotation.LNotTableField;
 import lyj.forward.generation.annotation.LTable;
@@ -9,7 +8,6 @@ import lyj.forward.generation.entity.entityInfo.EntityFieldMetaInfo;
 import lyj.forward.generation.entity.entityInfo.EntityMetaInfo;
 import lyj.forward.generation.enums.ColumnType;
 import lyj.forward.generation.enums.IdType;
-import lyj.forward.generation.exception.MyException;
 import lyj.forward.generation.parser.Parser;
 import lyj.forward.generation.utils.StringUtil;
 import org.slf4j.Logger;
@@ -39,16 +37,17 @@ public class EntityParserHandler extends Parser
     }
 
     @Override
-    public void parser(List<Class<?>> entityClass)
+    public void parser(List<Class<?>> entityClass) throws Exception
     {
         logger.info("开始解析实体.....");
         List<EntityMetaInfo> entityList = new ArrayList<>();
-        Map<String,EntityMetaInfo> metaInfoHashMap = new HashMap<>();
+        Map<String, EntityMetaInfo> metaInfoHashMap = new HashMap<>();
 
         // 装表
         List<String> arrayList = new ArrayList<>();
 
-        for (Class<?> aClass : entityClass) {
+        for (Class<?> aClass : entityClass)
+        {
             // 类中的属性
             List<EntityFieldMetaInfo> fieldInfos = new ArrayList<>();
             List<String> columnFields = new ArrayList<>();
@@ -73,14 +72,14 @@ public class EntityParserHandler extends Parser
             EntityMetaInfo entityMetaInfo = new EntityMetaInfo(entityName, tableName, fieldInfos, columnFields);
 
             entityList.add(entityMetaInfo);
-            metaInfoHashMap.put(tableName,entityMetaInfo);
+            metaInfoHashMap.put(tableName, entityMetaInfo);
         }
         configureEntity.setEntityMetaInfoMap(metaInfoHashMap);
         configureEntity.setEntityTableNames(arrayList);
         logger.info("解析完成.....");
     }
 
-    private void handlerFieldInfoChangeCoumn(EntityFieldMetaInfo fieldInfo, Field field)
+    private void handlerFieldInfoChangeCoumn(EntityFieldMetaInfo fieldInfo, Field field) throws Exception
     {
         // 列注解
         LColumn lColumn = field.getAnnotation(LColumn.class);
@@ -93,14 +92,17 @@ public class EntityParserHandler extends Parser
         String defaultValue = "";
         boolean aNull = true;
         ColumnType columnType = ColumnType.FIELDTYPE;
+        ColumnType mappingType = ColumnType.NULL;
         Integer width = 0;
         String remark = null;
         String name = "";
 
-        if (lColumn != null) {
+        if (lColumn != null)
+        {
             defaultValue = lColumn.defaultValue();
             aNull = lColumn.isNull();
             columnType = lColumn.type();
+            mappingType = lColumn.mapping();
             width = lColumn.width();
             remark = lColumn.comment().equals("") ? null : lColumn.comment();
             Class<?> fieldType = field.getType();
@@ -108,29 +110,41 @@ public class EntityParserHandler extends Parser
 
             // 检查类型是否匹配
             checkType(name, columnType);
-        } else {
+        }
+        else
+        {
             Class<?> fieldType = field.getType();
             name = fieldType.getSimpleName();
-            columnType = ColumnType.FIELDTYPE;
         }
 
         // 类型转换匹配
-        switch (name) {
+        switch (name)
+        {
             case "String":
                 columnType = ColumnType.VARCHAR;
-                if (width == 0) {
+
+                if (width == 0)
+                {
                     width = 255;
+                }
+
+                if (mappingType != ColumnType.NULL)
+                {
+                    columnType = lColumn.mapping();
+                    width = 0;
                 }
                 break;
             case "Integer":
                 columnType = ColumnType.INT;
-                if (width == 0) {
+                if (width == 0)
+                {
                     width = 11;
                 }
                 break;
             case "int":
                 columnType = ColumnType.INT;
-                if (width == 0) {
+                if (width == 0)
+                {
                     width = 11;
                 }
                 break;
@@ -139,6 +153,12 @@ public class EntityParserHandler extends Parser
                 break;
             case "double":
                 columnType = ColumnType.DOUBLE;
+                break;
+            case "Long":
+                columnType = ColumnType.BIGINT;
+                break;
+            case "long":
+                columnType = ColumnType.BIGINT;
                 break;
             case "Float":
                 columnType = ColumnType.FLOAT;
@@ -155,6 +175,7 @@ public class EntityParserHandler extends Parser
                 break;
             case "boolean":
                 columnType = ColumnType.TINYINT;
+                width = 2;
                 break;
             case "byte[]":
                 columnType = ColumnType.LONGBLOB;
@@ -162,9 +183,11 @@ public class EntityParserHandler extends Parser
             case "byte":
                 columnType = ColumnType.LONGBLOB;
                 break;
+            default:
+                throw new Exception("数据库找不到对应的字段类型");
         }
 
-        fieldInfo.setName(field.getName());
+        fieldInfo.setName(StringUtil.uncapitalizeToUnderLine(field.getName()));
         fieldInfo.setDefaultValue(defaultValue);
         fieldInfo.setNull(aNull);
         fieldInfo.setWidth(width);
@@ -172,11 +195,13 @@ public class EntityParserHandler extends Parser
         fieldInfo.setRemark(remark);
 
         // 是否是主键
-        if (lTableId != null) {
+        if (lTableId != null)
+        {
             fieldInfo.setPrimaryKey(true);
             IdType type = lTableId.type();
             fieldInfo.setIdType(type);
-            switch (type) {
+            switch (type)
+            {
                 case AUTO:
                     fieldInfo.setAuto(true);
                     break;
@@ -189,23 +214,32 @@ public class EntityParserHandler extends Parser
     }
 
 
-    private void checkWhetherExtendSuperClass(Class<?> aClass, List<EntityFieldMetaInfo> fieldInfos, List<String> columnFields)
+    private void checkWhetherExtendSuperClass(Class<?> aClass, List<EntityFieldMetaInfo> fieldInfos, List<String> columnFields) throws Exception
     {
         Class<?> superclass = aClass.getSuperclass();
-        if (superclass != null && !superclass.getName().equals("java.lang.Object")) {
+        if (superclass != null && !superclass.getName().equals("java.lang.Object"))
+        {
             Field[] fields = superclass.getDeclaredFields();
             handlerField(fieldInfos, fields, columnFields);
         }
     }
 
-    private void handlerField(List<EntityFieldMetaInfo> entityFfields, Field[] fields, List<String> columnFields)
+    private void handlerField(List<EntityFieldMetaInfo> entityFfields, Field[] fields, List<String> columnFields) throws Exception
     {
-        for (Field field : fields) {
+        for (Field field : fields)
+        {
             // 判断属性注解 是否是表中字段
             LNotTableField lTableField = field.getAnnotation(LNotTableField.class);
-            if (lTableField != null) {
+
+            // 排除serialVersionUID
+            if (lTableField != null || "serialVersionUID".equals(field.getName()))
+            {
                 continue;
             }
+
+            // 如果不是表中字段 ️没有加注解 比如 String[] 数组这一种
+            filterFIleTypeIsArrayOrList(field);
+
             // 字段信息
             EntityFieldMetaInfo fieldInfo = new EntityFieldMetaInfo();
             fieldInfo.setName(StringUtil.uncapitalizeToUnderLine(field.getName()));
@@ -215,19 +249,46 @@ public class EntityParserHandler extends Parser
         }
     }
 
+
+    /**
+     * 检查非表中字段
+     *
+     * @param field
+     */
+    private void filterFIleTypeIsArrayOrList(Field field) throws Exception
+    {
+        String tip = "";
+        Class<?> type = field.getType();
+        if (type.isArray())
+        {
+            tip = "数组";
+        }
+        else if (type == List.class)
+        {
+            tip = "List[]";
+        }
+        String msg = "实体属性出现 " + tip + " 类型数据，无法生成对应的字段，请加上注解，排除掉非表中字段";
+        if (!"".equals(tip))
+        {
+            throw new Exception(msg);
+        }
+    }
+
+
     /**
      * <br>
      * 检查类型是否匹配
      */
-    private void checkType(String name, ColumnType type)
+    private void checkType(String name, ColumnType type) throws Exception
     {
         // 校验规则
         if (("String".equals(name) && type == ColumnType.DATE)
                 || "String".equals(name) && type == ColumnType.TIME
                 || "String".equals(name) && type == ColumnType.DATETIME
                 || "String".equals(name) && type == ColumnType.YEAR
-        ) {
-            throw new MyException("[ " + name + " ]类型与[ " + type.name() + " ]不匹配");
+        )
+        {
+            throw new Exception("[ " + name + " ]类型与[ " + type.name() + " ]不匹配");
         }
     }
 

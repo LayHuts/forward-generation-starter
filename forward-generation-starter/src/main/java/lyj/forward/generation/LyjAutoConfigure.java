@@ -67,16 +67,31 @@ public class LyjAutoConfigure implements InitializingBean
 
         // 解析实体
         EntityParserHandler parserHandler = new EntityParserHandler(configureEntity);
-        parserHandler.parser(classes);
+        try
+        {
+            parserHandler.parser(classes);
+        }
+        catch (Exception e)
+        {
+            logger.error("解析实体出错");
+            return;
+        }
 
         // 读取数据库中的表信息
         TableParserHandler tableParserHandler = new TableParserHandler(configureEntity,ddlExecutor);
-        tableParserHandler.parser();
+        try
+        {
+            tableParserHandler.parser();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            logger.error("读取库已有的表出错",e.getMessage());
+            return;
+        }
 
         DataBaseServiceHandler serviceHandler = new DataBaseServiceHandler(this.ddlExecutor,configureEntity);
         serviceHandler.excute();
-
-        logger.info("表已更新-------->");
 
     }
 }
