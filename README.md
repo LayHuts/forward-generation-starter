@@ -72,6 +72,15 @@ public @interface LColumn
      * 注释
      */
     String comment() default "";
+    
+    /**
+     * <br>
+     *  当实体 String, 数据库字段对应的是,longtext 或者其它时候，需要指定好
+     *  比如文章内容的 实体 String 数据库 也要 longtext 或者其它才行，指定后，
+     * 对应的数据库字段类型 优先
+     */
+    ColumnType mapping() default ColumnType.NULL;
+    
 
 }
 
