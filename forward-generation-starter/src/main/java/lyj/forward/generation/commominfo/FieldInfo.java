@@ -1,7 +1,7 @@
 package lyj.forward.generation.commominfo;
 
 import lyj.forward.generation.enums.ColumnType;
-import lyj.forward.generation.enums.IdType;
+import lyj.forward.generation.enums.Type;
 
 /**
  * <br>
@@ -19,7 +19,7 @@ public class FieldInfo
 
     /**
      * <br>
-     *  字段类型
+     * 字段类型
      */
     private ColumnType type;
 
@@ -51,13 +51,13 @@ public class FieldInfo
      * <br>
      * 是否为主键
      */
-    private boolean primaryKey=false;
+    private boolean primaryKey = false;
 
     /**
      * <br>
      * 类型
      */
-    private IdType idType;
+    private Type idType;
 
     /**
      * <br>
@@ -132,12 +132,12 @@ public class FieldInfo
         this.primaryKey = primaryKey;
     }
 
-    public IdType getIdType()
+    public Type getIdType()
     {
         return idType;
     }
 
-    public void setIdType(IdType idType)
+    public void setIdType(Type idType)
     {
         this.idType = idType;
     }

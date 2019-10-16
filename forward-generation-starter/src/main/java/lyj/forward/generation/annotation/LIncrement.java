@@ -1,6 +1,6 @@
 package lyj.forward.generation.annotation;
 
-import lyj.forward.generation.enums.IdType;
+import lyj.forward.generation.enums.Type;
 
 import java.lang.annotation.*;
 
@@ -15,5 +15,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface LIncrement
 {
-    IdType type() default IdType.NONE;
+    Type type() default Type.NONE;
 }

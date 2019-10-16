@@ -7,13 +7,15 @@ import lyj.forward.generation.annotation.LTableId;
 import lyj.forward.generation.entity.entityInfo.EntityFieldMetaInfo;
 import lyj.forward.generation.entity.entityInfo.EntityMetaInfo;
 import lyj.forward.generation.enums.ColumnType;
-import lyj.forward.generation.enums.IdType;
+import lyj.forward.generation.enums.Type;
+import lyj.forward.generation.exception.MyException;
 import lyj.forward.generation.parser.Parser;
 import lyj.forward.generation.utils.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -169,6 +171,9 @@ public class EntityParserHandler extends Parser
             case "Date":
                 columnType = ColumnType.DATETIME;
                 break;
+            case "LocalDateTime":
+                columnType = ColumnType.DATETIME;
+                break;
             case "Boolean":
                 columnType = ColumnType.TINYINT;
                 width = 2;
@@ -184,7 +189,7 @@ public class EntityParserHandler extends Parser
                 columnType = ColumnType.LONGBLOB;
                 break;
             default:
-                throw new Exception("数据库找不到对应的字段类型");
+                throw new Exception("数据库找不到对应的字段类型,请使用注解 @LNotTableField 排除掉非表中字段==>" + name);
         }
 
         fieldInfo.setName(StringUtil.uncapitalizeToUnderLine(field.getName()));
@@ -198,7 +203,7 @@ public class EntityParserHandler extends Parser
         if (lTableId != null)
         {
             fieldInfo.setPrimaryKey(true);
-            IdType type = lTableId.type();
+            Type type = lTableId.type();
             fieldInfo.setIdType(type);
             switch (type)
             {
@@ -267,7 +272,7 @@ public class EntityParserHandler extends Parser
         {
             tip = "List[]";
         }
-        String msg = "实体属性出现 " + tip + " 类型数据，无法生成对应的字段，请加上注解，排除掉非表中字段";
+        String msg = "实体属性 " + field.getName() + " 出现 " + tip + " 类型数据，无法生成对应的字段，请加上 @LNotTableField 注解，排除掉非表中字段";
         if (!"".equals(tip))
         {
             throw new Exception(msg);

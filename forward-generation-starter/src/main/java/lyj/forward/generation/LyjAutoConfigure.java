@@ -73,6 +73,7 @@ public class LyjAutoConfigure implements InitializingBean
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             logger.error("解析实体出错");
             return;
         }

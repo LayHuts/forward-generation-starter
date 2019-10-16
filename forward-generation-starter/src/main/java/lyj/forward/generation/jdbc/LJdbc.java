@@ -36,7 +36,7 @@ public class LJdbc
                 connection.setAutoCommit(false);
                 logger.info("@_@!  数据库连接成功");
             } catch (Exception e) {
-                logger.info("@_@!  数据库连接失败," + e);
+                logger.error("@_@!  数据库连接失败," + e);
                 e.printStackTrace();
             }
         }
