@@ -1,6 +1,9 @@
 # forward-generation-starter
 类似JPA根据实体生成表的一个   starter   仅限于mybatis
 
+
+排除非表中字段：可以加修饰符 transient
+
 配置文件：.yml
 ```
 spring:

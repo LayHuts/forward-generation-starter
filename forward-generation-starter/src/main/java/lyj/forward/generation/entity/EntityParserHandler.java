@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -235,6 +236,11 @@ public class EntityParserHandler extends Parser
         {
             // 判断属性注解 是否是表中字段
             LNotTableField lTableField = field.getAnnotation(LNotTableField.class);
+
+            if (Modifier.toString(field.getModifiers()).indexOf("transient")>=0)
+            {
+                continue;
+            }
 
             // 排除serialVersionUID
             if (lTableField != null || "serialVersionUID".equals(field.getName()))
