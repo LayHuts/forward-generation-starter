@@ -24,7 +24,7 @@ import java.util.Map;
  */
 public abstract class DdlBaseService
 {
-    private static Logger logger =LoggerFactory.getLogger(DdlBaseService.class);
+    private static Logger logger = LoggerFactory.getLogger(DdlBaseService.class);
 
     protected Excutor excutor;
 
@@ -38,21 +38,26 @@ public abstract class DdlBaseService
      */
     protected void dropTable(List<String> tableNames) throws SQLException
     {
-        for (String tableName : tableNames) {
+        for (String tableName : tableNames)
+        {
             getExcutor().update(String.format(DdlSql.DROP_TABLE.getDdlSql(), tableName));
         }
     }
 
 
-    protected void createTable(Map<String,EntityMetaInfo> entityMetaInfoMap)
+    protected void createTable(Map<String, EntityMetaInfo> entityMetaInfoMap)
     {
-        for (Map.Entry<String, EntityMetaInfo> entry : entityMetaInfoMap.entrySet()) {
+        for (Map.Entry<String, EntityMetaInfo> entry : entityMetaInfoMap.entrySet())
+        {
             EntityMetaInfo entityMetaInfo = entry.getValue();
             // 不存在则创建
             String ddlSql = installCreateTableDdlSql(DdlSql.CREATE_TABLE, entityMetaInfo);
-            try {
+            try
+            {
                 getExcutor().update(ddlSql);
-            } catch (SQLException e) {
+            }
+            catch (SQLException e)
+            {
                 e.printStackTrace();
                 logger.error(ddlSql);
             }
@@ -63,19 +68,23 @@ public abstract class DdlBaseService
      * <br>
      * 创建表
      */
-    protected void createTable(List<String> tableNames, ConfigureEntityTable configureEntityTable, Map<String,EntityMetaInfo> entityMetaInfoMap) throws SQLException
+    protected void createTable(List<String> tableNames, ConfigureEntityTable configureEntityTable, Map<String, EntityMetaInfo> entityMetaInfoMap) throws SQLException
     {
-        for (Map.Entry<String, EntityMetaInfo> entry : entityMetaInfoMap.entrySet()) {
+        for (Map.Entry<String, EntityMetaInfo> entry : entityMetaInfoMap.entrySet())
+        {
 
-            String tableName=entry.getKey();
+            String tableName = entry.getKey();
             EntityMetaInfo entityMetaInfo = entry.getValue();
 
             // 判断表是否存在
-            if (!tableNames.contains(tableName)) {
+            if (!tableNames.contains(tableName))
+            {
                 // 不存在则创建
                 String ddlSql = installCreateTableDdlSql(DdlSql.CREATE_TABLE, entityMetaInfo);
                 getExcutor().update(ddlSql);
-            } else {
+            }
+            else
+            {
                 // 存在 就更新
 
                 // 当前实体的属性
@@ -83,18 +92,22 @@ public abstract class DdlBaseService
 
 
                 // 一个个属性去更新
-                for (EntityFieldMetaInfo fieldMetaInfo : fieldInfos) {
+                for (EntityFieldMetaInfo fieldMetaInfo : fieldInfos)
+                {
 
                     // 先判断表里是否存在字段
                     TableMetaInfo tabledInfo = configureEntityTable.getTabledInfo(tableName);
                     List<String> columNames = tabledInfo.getColumNames();
 
-                    if (columNames.contains(fieldMetaInfo.getName())) {
+                    if (columNames.contains(fieldMetaInfo.getName()))
+                    {
                         // 已经存在字段 执行更新
 
                         String sqlS = installAlterTableField(DdlSql.ALTER_TABLE, fieldMetaInfo, tableName);
                         getExcutor().update(sqlS);
-                    } else {
+                    }
+                    else
+                    {
                         // 不存在 新增字段
                         String sqlS = installAlterTableField(DdlSql.ALTER_TABLE_ADD, fieldMetaInfo, tableName);
                         getExcutor().update(sqlS);
@@ -120,7 +133,8 @@ public abstract class DdlBaseService
 
         // 属性字段元数据
         List<EntityFieldMetaInfo> fieldInfos = entityMetaInfo.getFieldInfos();
-        for (EntityFieldMetaInfo field : fieldInfos) {
+        for (EntityFieldMetaInfo field : fieldInfos)
+        {
             // 字段名
             String columName = field.getName();
 
@@ -142,7 +156,8 @@ public abstract class DdlBaseService
             // 是否是主键
             boolean primaryKey = field.isPrimaryKey();
 
-            if (primaryKey) {
+            if (primaryKey)
+            {
                 primary.append(columName + ",");
             }
 
@@ -154,36 +169,52 @@ public abstract class DdlBaseService
 
             // 类型
             buffer.append(type);
-            if (width > 0) {
+            if (width > 0)
+            {
                 buffer.append("(" + width + ")");
             }
 
-            if (!aNull) {
+            if (!aNull)
+            {
                 buffer.append(" NOT NULL");
             }
 
-            if (auto) {
+            if (auto)
+            {
                 buffer.append(" AUTO_INCREMENT");
             }
 
             // 默认值
-            if (defaultValue.equals("")) {
-                if (primaryKey) {
-                } else {
+            if (defaultValue.equals(""))
+            {
+                if (primaryKey)
+                {
+                }
+                else
+                {
                     buffer.append(" DEFAULT NULL");
                 }
-            } else {
+            }
+            else
+            {
                 buffer.append(" DEFAULT " + "\'" + defaultValue + "\'");
             }
 
             // 注释
-            if (remark != null) {
+            if (remark != null)
+            {
                 buffer.append(" COMMENT " + "\'" + remark + "\'");
             }
 
             buffer.append(",");
+
         }
-        buffer.append("PRIMARY KEY (" + primary.toString().substring(0, primary.toString().length() - 1) + ")");
+
+        if (primary.toString().length() > 0)
+        {
+            buffer.append("PRIMARY KEY (" + primary.toString().substring(0, primary.toString().length() - 1) + ")");
+        }
+
 
         String sqlTempParam = buffer.toString();
 
@@ -202,7 +233,8 @@ public abstract class DdlBaseService
         String columName = fieldInfo.getName();
 
 
-        if (columName == null || columName.equals("")) {
+        if (columName == null || columName.equals(""))
+        {
             columName = fieldInfo.getName();
         }
 
@@ -233,29 +265,39 @@ public abstract class DdlBaseService
 
         // 类型
         buffer.append(type);
-        if (width > 0) {
+        if (width > 0)
+        {
             buffer.append("(" + width + ")");
         }
 
-        if (!aNull) {
+        if (!aNull)
+        {
             buffer.append(" NOT NULL");
         }
 
-        if (auto) {
+        if (auto)
+        {
             buffer.append(" AUTO_INCREMENT");
         }
 
 
-        if (defaultValue.equals("")) {
-            if (primaryKey) {
-            } else {
+        if (defaultValue.equals(""))
+        {
+            if (primaryKey)
+            {
+            }
+            else
+            {
                 buffer.append(" DEFAULT NULL");
             }
-        } else {
+        }
+        else
+        {
             buffer.append(" DEFAULT " + "\'" + defaultValue + "\'");
         }
 
-        if (remark != null) {
+        if (remark != null)
+        {
             buffer.append(" COMMENT " + "\'" + remark + "\'");
         }
 
@@ -266,7 +308,8 @@ public abstract class DdlBaseService
 
     private String getCoumType(ColumnType type)
     {
-        switch (type) {
+        switch (type)
+        {
             case VARCHAR:
                 return "VARCHAR";
             case INT:

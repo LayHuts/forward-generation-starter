@@ -17,10 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <br>
@@ -237,13 +234,17 @@ public class EntityParserHandler extends Parser
             // 判断属性注解 是否是表中字段
             LNotTableField lTableField = field.getAnnotation(LNotTableField.class);
 
-            if (Modifier.toString(field.getModifiers()).indexOf("transient")>=0)
+
+            int modifiers = field.getModifiers();
+            List<String> list = Arrays.asList(Modifier.toString(modifiers).split(" "));
+            if (list.contains("transient") || list.contains("static"))
             {
                 continue;
             }
 
+
             // 排除serialVersionUID
-            if (lTableField != null || "serialVersionUID".equals(field.getName()))
+            if (lTableField != null)
             {
                 continue;
             }
@@ -272,6 +273,10 @@ public class EntityParserHandler extends Parser
         Class<?> type = field.getType();
         if (type.isArray())
         {
+            if (type == byte[].class)
+            {
+                return;
+            }
             tip = "数组";
         }
         else if (type == List.class)
